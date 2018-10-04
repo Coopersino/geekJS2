@@ -1,0 +1,153 @@
+<!-- 1. Реализовать вывод списка пользователей(http://89.108.65.123/user)
+     2. Реализовать возможность просмотра информации по конкретному пользователю(http://89.108.65.123/user/1) при клике на пользователя в списке
+     3. Создать форму для создания пользователя -->
+
+<!doctype html>
+<html lang="ru">
+
+<head>
+  <meta charset="utf-8">
+</head>
+
+<body>
+  <div id="user-list">
+    <table id="table-caption">
+      <tr>
+        <td>Name</td>
+        <td>Email</td>
+        <td>Age</td>
+      </tr>
+    </table>
+  </div>
+  <form id='form'>
+    <fieldset>
+      <label for="name">Name:</label>
+      <input type="text" id="name">
+      <label for="email">Email:</label>
+      <input type="text" id="email">
+      <label for="age">Age:</label>
+      <input type="text" id="age">
+    </fieldset>
+    <button type="submit" id="submit-btn">Create</button>
+  </form>
+
+  <script>
+
+    //Почему-то если записать эту функцию в таком стиле, то теряется контекст и в this попадает объект window
+    //Не могли бы вы на лекции осветить этот момент 
+    //
+    // const getUserInfo = () => {
+    //   let userID = this;
+    //    userID = userID.id*1+1;
+      
+    //   return fetch('http://89.108.65.123/user/' + userID)
+    //     .then(result => result.text())
+    //     .then((text) => {
+    //       let userInfo = JSON.parse(text);
+    //       console.log(userInfo);
+    //     })
+    //     .catch((error) => {
+    //       console.error(error);
+    //     })
+    // }
+
+    function getUserInfo(){
+      let userID = this;
+       userID = userID.id*1+1;
+      
+      return fetch('http://89.108.65.123/user/' + userID)
+        .then(result => result.text())
+        .then((text) => {
+          let userInfo = JSON.parse(text);
+          console.log(userInfo);
+        })
+        .catch((error) => {
+          console.error(error);
+        })
+    }
+
+    const getUsersList = () => {
+      return fetch('http://89.108.65.123/user')
+        .then(result => result.text())
+        .then((text) => {
+          let userList = JSON.parse(text);
+          createTable(userList);
+        })
+        .catch((error) => {
+          console.error(error);
+        })
+    }
+
+    const createTable = (userList) => {
+      const usersTable = document.querySelector('#table-caption');
+      const tableRows = usersTable.getElementsByTagName('tr');
+      const rowCount = tableRows.length;
+
+      for (var x = rowCount - 1; x > 0; x--) {
+        usersTable.removeChild(tableRows[x]);
+      }
+
+      function cs(name, email, age, i) {
+        let tableString = document.createElement('tr');
+        tableString.setAttribute('id', i);
+        let tableTdName = document.createElement('td');
+        tableTdName.textContent = name;
+        let tableTdEmail = document.createElement('td');
+        tableTdEmail.textContent = email;
+        let tableTdAge = document.createElement('td');
+        tableTdAge.textContent = age;
+        tableString.appendChild(tableTdName);
+        tableString.appendChild(tableTdEmail);
+        tableString.appendChild(tableTdAge);
+        return tableString;
+      }
+
+      for (i = 0;
+        (i <= userList.length - 1); i++) {
+        if (userList[i].name !== undefined) {
+          let str = cs(userList[i].name, userList[i].email, userList[i].age, i);
+          usersTable.appendChild(str);
+          str.addEventListener('click', getUserInfo)
+        }
+      }
+    }
+
+    const createUser = () => {
+      let userName = document.querySelector('#name');
+      let userEmail = document.querySelector('#email');
+      let userAge = document.querySelector('#age');
+      let newUser = {
+        name: userName.value,
+        email: userEmail.value,
+        age: userAge.value
+      }
+      newUser = JSON.stringify(newUser);
+
+      return fetch('http://89.108.65.123/user', {
+          method: 'POST',
+          body: newUser
+        }).then(result => {
+          getUsersList();
+          return result.status
+        })
+        .catch((error) => {
+          console.error(error);
+        })
+    }
+
+    const initForm = () => {
+      const usersTable = document.querySelector('#table-caption');
+      const submitBtn = document.querySelector('#submit-btn');
+      getUsersList();
+
+      submitBtn.addEventListener('click', (event) => {
+        event.preventDefault();
+        createUser().then()
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', initForm)
+  </script>
+</body>
+
+</html>
