@@ -1,0 +1,115 @@
+<!-- 1. У вас есть большой текст, в котором для обозначения диалогов используются одинарные кавычки. Придумать шаблон, который меняет одинарные кавычки на двойные.
+2. Улучшить шаблон таким образом, чтобы конструкции типа aren’t не меняли одинарную кавычку на двойную.
+3. Создать форму обратной связи с полями: Имя, Телефон, e-mail, текст, кнопка «Отправить».
+** - При нажатии на кнопку «Отправить» произвести валидацию полей следующим образом:
+
+- Имя содержит только буквы;
+
+** - Телефон подчиняется шаблону +7(000)000-0000;**
+
+** - E-mail выглядит как mymail@mail.ru, или my.mail@mail.ru, или my-mail@mail.ru**
+
+** - Текст произвольный;**
+** - В случае не прохождения валидации одним из полей необходимо выделять это поле красной рамкой и сообщать пользователю об ошибке.** -->
+
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <style>
+    .wrong-input {
+    border: 1px solid red;
+    }
+    .hide {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <main class="page-main">
+    <form class="form-style" id="form">
+      <fieldset class="form-fieldset">
+        <label for="name" class="form-label">Name:</label>
+        <input type="text" class="form-input" id="name">
+      </fieldset>
+      <fieldset class="form-fieldset">
+        <label for="ph-n" class="form-label">phone number:</label>
+        <input type="text" class="form-input" id="ph-n">
+      </fieldset>
+      <fieldset class="form-fieldset">
+        <label for="email" class="form-label">email:</label>
+        <input type="text" class="form-input" id="email">
+      </fieldset>
+      <fieldset class="form-fieldset">
+        <label for="message" class="form-label">message:</label>
+        <input type="text" class="form-input" id="message">
+      </fieldset>
+    </form>
+    <button type="submit" id="submit">Enter</button>
+    <span class="hide" id="mistake">Ошибка!</span>
+  </main>
+  <script>
+    const nameRule = /^([a-zA-Z]+)/;
+    const phNrule = /^((\+7))(\(\d{3}\)[\d\-]?)[\d\- ]{8}$/;
+    const emailRule = /^\w{2}[.\-]?\w{4}@\w{4}\.(ru|com)$/;
+    const messageRule = /^\s*$/;
+
+    let enterBtn = document.querySelector('#submit');
+    let name = document.querySelector('#name');
+    let phN = document.querySelector('#ph-n');
+    let email = document.querySelector('#email');
+    let message = document.querySelector('#message');
+    let mistake = document.querySelector('#mistake');
+
+    let succesfulValidation = true;
+
+    inputsArr = document.getElementsByTagName('input');
+
+    let i = 1;
+    while (i <= inputsArr.length) {
+      inputsArr[i - 1].addEventListener('focus', remClass)
+      i++;
+    }
+
+    function remClass() {
+      this.classList.remove('wrong-input');
+      mistake.textContent = '';
+    }
+
+    enterBtn.addEventListener('click', validationInputs);
+
+    function getMistake(input, text) {
+      succesfulValidation = false;
+      input.classList.add('wrong-input');
+      mistake.classList.remove('hide');
+      mistake.textContent = mistake.textContent + ' ' + text;
+      succesfulValidation = false;
+    }
+
+    function validationInputs() {
+      succesfulValidation = true;
+      if (!nameRule.test(name.value)) {
+        getMistake(name, 'Имя содержит только буквы');
+      }
+
+      if (!phNrule.test(phN.value)) {
+        getMistake(phN, 'Телефон подчиняется шаблону +7(000)000-0000');
+      }
+
+      if (!emailRule.test(email.value)) {
+        getMistake(email, 'E-mail выглядит как mymail@mail.ru, или my.mail@mail.ru, или my-mail@mail.ru');
+      }
+
+      if (messageRule.test(message.value)) {
+        getMistake(message, 'Текст произвольный');
+      }
+
+      if (succesfulValidation === true) {
+        alert("Succesful validation!");
+      }
+    }
+  </script>
+</body>
+
+</html>
