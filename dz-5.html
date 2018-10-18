@@ -1,0 +1,111 @@
+<html>
+
+<head>
+</head>
+
+<body>
+  <script>
+    const httpService = function () {
+      const BASE_URL = 'http://89.108.65.123:8080';
+
+      this.methods = {
+        GET: 'GET',
+        POST: 'POST',
+        DELETE: 'DELETE',
+        PATCH: 'PATCH'
+      }
+
+      this.request = async function (url = '/', method = 'GET', body) {
+        const options = body ? {
+          method,
+          body: JSON.stringify(body),
+        } : {
+          method
+        }
+
+        try {
+          return await fetch(`${BASE_URL}${url}`, options).then((res) => {
+            return res.json()
+          }).catch((err) => console.log(err));
+        } catch (e) {
+          return false
+        }
+      }
+    }
+
+    const $http = new httpService();
+
+    const getUser = async (user) => {
+      if (user) return await $http.request(`/shop?user_id=${user}`, $http.methods.GET);
+      return await $http.request('/shop', $http.methods.GET);
+    }
+
+    const addProduct = async (userId, productName, price) => {
+      await $http.request(`/shop?user_id=${userId}&product=${productName}&price=${price}`, $http.methods.POST);
+    }
+
+    const delProduct = async (userId, productId) => {
+      await $http.request(`/shop?user_id=${userId}&product_id=${productId}`, $http.methods.DELETE);
+    }
+
+    const test = async () => {
+      const user = await getUser();
+      console.log(user.user_id);
+      await addProduct(user.user_id, 'iPhone X', 75000);
+      const userInfo = await getUser(user.user_id);
+      console.log(await getUser(user.user_id));
+      await delProduct(user.user_id, userInfo.cart[0].product_id);
+      console.log(await getUser(user.user_id));
+    }
+
+    //метод удаления товара из корзины.
+    test();
+
+    const getReviewList = async () => {
+      const result = await $http.request(`/comments`, $http.methods.GET);
+    }
+
+    const test1 = async () => {
+      const result = await getReviewList();
+      console.log(result);
+    }
+
+    //Вывод отзывов
+    test1();
+
+    const addReview = async (text) => {
+      await $http.request(`/comments?text=${text}`, $http.methods.POST);
+    }
+
+    const test2 = async () => {
+      const result = await addReview('просто новый коммент');
+      console.log(result);
+    }
+
+    //Добавить отзыв
+    test2();
+
+    const submitReview = async (commentId) => {
+      await $http.request(`/comments?comment_id=${commentId}`, $http.methods.PATCH);
+    }
+
+    const test3 = async () => {
+      const result = await submitReview('_hy0ragwc7');
+    }
+    //Одобрить отзыв
+    test3();
+
+    const deleteReview = async (commentId) => {
+      await $http.request(`/comments?comment_id=${commentId}`, $http.methods.DELETE);
+    }
+
+    const test4 = async () => {
+      const result = await deleteReview('_c0244j4jd');
+    }
+
+    //Удалить отзыв
+    test4();
+  </script>
+</body>
+
+</html>
